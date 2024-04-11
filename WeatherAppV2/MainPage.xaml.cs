@@ -8,6 +8,7 @@ namespace WeatherAppV2
 {
     public partial class MainPage : ContentPage
     {
+        //Variables
         private int _temp;
         private double _wind;
         private int _humidity;
@@ -16,9 +17,13 @@ namespace WeatherAppV2
         private int _clouds;
         private string _weatherdescription;
         private int _dateAndTime;
-        private int _sunrise;
-        private int _sunset;
-        private long dateModified;
+        private string _sunrise;
+        private string _sunset;
+        private string dateModified;
+        private double _tempmin;
+        private double _tempmax;
+        private double _feelslike;
+        private GeoClass _geoClass;
 
         public int Temp
         {
@@ -90,17 +95,7 @@ namespace WeatherAppV2
             }
         }
 
-        public int DateAndTime
-        {
-            get { return _dateAndTime; }
-            set
-            {
-                _dateAndTime = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public int Sunrise
+        public string Sunrise
         {
             get { return _sunrise; }
             set
@@ -110,7 +105,7 @@ namespace WeatherAppV2
             }
         }
 
-        public int Sunset
+        public string Sunset
         {
             get { return _sunset; }
             set
@@ -120,32 +115,33 @@ namespace WeatherAppV2
             }
         }
 
-        public long DateModified
+        public string DateModified
         {
             get => dateModified;
             set
-            {
-                if (dateModified.Equals(value)) return;
+            {                
                 dateModified = value;
                 OnPropertyChanged();
             }
         }
+        
+        public double TempMin
+        {
+            get { return _tempmin; }
+            set { _tempmin = value; OnPropertyChanged(); }
+        }
+        
+        public double TempMax
+        {
+            get { return _tempmax; }
+            set { _tempmax = value; OnPropertyChanged(); }
+        }
 
-        private GeoClass _geoClass;
-
-        private string _currentWeather;
-
-        /* public string CurrentWeather
-         {
-             get { return _currentWeather; }
-             set
-             {
-                 _currentWeather = value;
-                 OnPropertyChanged();
-             }
-         }*/
-
-
+        public double FeelsLike
+        {
+            get { return _feelslike; }
+            set { _feelslike = value; OnPropertyChanged(); }
+        }
 
         public MainPage()
         {
@@ -155,22 +151,14 @@ namespace WeatherAppV2
             _client.DefaultRequestHeaders.Add("Accept", "application/json");
             _geoClass = new GeoClass();
             BindingContext = this;
-
         }
-
-        //private void InitializeComponent()
-        //{
-        //    throw new NotImplementedException();
-        //}
-
+        
         public ICommand ShowWeatherCommand { get; set; }
-
-       
         private HttpClient _client;
 
         public async void GetLatestWeather(object parameters)
         {
-            DateAndTime currenttime = new DateAndTime();
+            await DisplayAlert("Notice", "Weather Is Updating...", "Okay");
 
             Location location = await _geoClass.GetCurrentLocation();
             double lat = location.Latitude;
@@ -182,58 +170,37 @@ namespace WeatherAppV2
 
             WeatherData currentweather = JsonConvert.DeserializeObject<WeatherData>(response);
 
-
-
             if (currentweather != null)
             {
                 Temp = (int)Math.Round(currentweather.Main.Temperature);
                 Wind = currentweather.Wind.Speed;
-                Sunrise = (int)currentweather.Sys.Sunrise;
-                Sunset = (int)currentweather.Sys.Sunset;
-                DateModified = currentweather.Dt;
-                Humidity = (int)currentweather.Main.Humidity;
-                Pressure = (int)currentweather.Sys.Sunrise;
+
+                DateTimeOffset dtOffset = DateTimeOffset.FromUnixTimeSeconds(currentweather.Sys.Sunrise);
+                Sunrise = dtOffset.UtcDateTime.ToString();
+
+                dtOffset = DateTimeOffset.FromUnixTimeSeconds(currentweather.Sys.Sunset);
+                Sunset = dtOffset.UtcDateTime.ToString();
+
+                dtOffset = DateTimeOffset.FromUnixTimeSeconds(currentweather.Dt);
+                DateModified = dtOffset.UtcDateTime.ToString();
+
+                TempMax = Math.Round(currentweather.Main.TempMax);
+                TempMin = Math.Round(currentweather.Main.TempMin);
+                FeelsLike = Math.Round(currentweather.Main.FeelsLike);
+                Humidity = currentweather.Main.Humidity;
+                Pressure = currentweather.Sys.Sunrise;
                 Country = currentweather.Sys.Country;
-                Clouds = (int)currentweather.Clouds.All;
+                Clouds = currentweather.Clouds.All;
 
                 if (currentweather.Weather.Count() > 0)
                 {
-                    WeatherDescription = currentweather.Weather[0].Description;
+                    WeatherDescription = currentweather.Weather[0].Description.ToUpper();
                 }
 
             }
 
         }
 
-
-        //RestService _restService;
-
-        //public MainPage()
-        //{
-        //    InitializeComponent();
-        //    _restService = new RestService();
-        //}
-
-        //async void OnGetWeatherButtonClicked(object sender, EventArgs e)
-        //{
-        //    if (!string.IsNullOrWhiteSpace(_cityEntry.Text))
-        //    {
-        //        WeatherData weatherData = await
-        //            _restService.
-        //            GetWeatherData(GenerateRequestURL(WeatherAPI.OpenWeatherMapEndpoint));
-
-        //        BindingContext = weatherData;
-        //    }
-        //}
-
-        //string GenerateRequestURL(string endPoint)
-        //{
-        //    string requestUri = endPoint;
-        //    requestUri += $"?q={_cityEntry.Text}";
-        //    requestUri += "&units=metric";
-        //    requestUri += $"&APPID={WeatherAPI.OpenWeatherMapAPIKey}";
-        //    return requestUri;
-        //}
     }
 
 }

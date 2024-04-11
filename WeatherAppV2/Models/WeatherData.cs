@@ -27,7 +27,7 @@ namespace WeatherAppV2.Models
 
     public class Clouds
     {
-        public long All { get; set; }
+        public int All { get; set; }
     }
 
     public class Coord
@@ -39,20 +39,21 @@ namespace WeatherAppV2.Models
     public class Main
     {
         public double Temperature { get; set; }
-        public long Pressure { get; set; }
-        public long Humidity { get; set; }
+        public int Pressure { get; set; }
+        public int Humidity { get; set; }
         public double TempMin { get; set; }
         public double TempMax { get; set; }
+        public double FeelsLike { get; set; }
     }
 
     public class Sys
     {
-        public long Type { get; set; }
-        public long Id { get; set; }
+        public int Type { get; set; }
+        public int Id { get; set; }
         public double Message { get; set; }
         public string Country { get; set; }
-        public long Sunrise { get; set; }
-        public long Sunset { get; set; }
+        public int Sunrise { get; set; }
+        public int Sunset { get; set; }
     }
 
     public class Weather
